@@ -1,0 +1,45 @@
+Options -Indexes
+ServerSignature Off
+
+# ── Sécurité headers ──────────────────────────────────────
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options "nosniff"
+    Header always set X-Frame-Options "SAMEORIGIN"
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>
+
+# ── Protéger les dossiers sensibles ──────────────────────
+<FilesMatch "\.(sql|log|env|gs)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# ── Bloquer accès direct au dossier config ────────────────
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule ^config/ - [F,L]
+    RewriteRule ^includes/ - [F,L]
+</IfModule>
+
+# ── Cache statique ────────────────────────────────────────
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 3 months"
+    ExpiresByType image/png "access plus 3 months"
+    ExpiresByType image/webp "access plus 3 months"
+</IfModule>
+
+# ── Compression GZIP ──────────────────────────────────────
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/css application/javascript
+</IfModule>
+
+# ── PHP config ────────────────────────────────────────────
+<IfModule mod_php.c>
+    php_value upload_max_filesize 10M
+    php_value post_max_size 12M
+    php_value max_execution_time 60
+</IfModule>

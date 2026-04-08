@@ -1,0 +1,12 @@
+# Protection supplémentaire du dossier admin
+# Optionnel : restreindre par IP (décommentez et ajoutez votre IP)
+# Order Deny,Allow
+# Deny from all
+# Allow from 123.456.789.000   ← Votre IP fixe
+
+# Désactiver l'accès direct aux fichiers de config
+<FilesMatch "^(login|logout)\.php$">
+    # Ces fichiers sont publics — connexion admin
+</FilesMatch>
+
+Options -Indexes
