@@ -3,7 +3,7 @@ $pageTitle = 'REPARE-MOI CI — Pièces détachées smartphones Côte d\'Ivoire'
 $pageDesc  = 'Achetez vos pièces détachées smartphones pas chers en Côte d\'Ivoire. Samsung, iPhone, Huawei, Xiaomi. Livraison Abidjan 24h. Garantie 48h.';
 
 ob_start(); ?>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<!-- (swiper supprimé — non utilisé) -->
 <style>
 /* ══════════════════════════════════════════════
    REPARE-MOI CI — Homepage v4
@@ -334,7 +334,7 @@ function prod_card($p, $badge='') {
         <p class="hero-sub">
           <strong>Qualité certifiée</strong> &nbsp;•&nbsp;
           <strong>Garantie 48h</strong> &nbsp;•&nbsp;
-          <strong><?= $nbProduits ?>+ références</strong>
+          <strong><?= $nbMarques ?> marques disponibles</strong>
         </p>
         <div class="hero-ctas-v4">
           <a href="<?= SITE_URL ?>/catalogue.php?categorie=%C3%89cran" class="btn-hero-primary">
@@ -407,7 +407,7 @@ function prod_card($p, $badge='') {
   <div class="sec-header">
     <div>
       <div class="sec-tag">Recherche rapide</div>
-      <div class="sec-title">Toutes nos marques</div>
+      <h2 class="sec-title">Toutes nos marques</h2>
     </div>
     <a href="<?= SITE_URL ?>/catalogue.php" class="sec-link">Voir tout le catalogue →</a>
   </div>
@@ -434,7 +434,7 @@ function prod_card($p, $badge='') {
   <div class="sec-header">
     <div>
       <div class="sec-tag">Navigation rapide</div>
-      <div class="sec-title">Catégories principales</div>
+      <h2 class="sec-title">Catégories principales</h2>
     </div>
   </div>
   <div class="cats-grid-v4">
@@ -499,7 +499,7 @@ function prod_card($p, $badge='') {
   <div class="sec-header">
     <div>
       <div class="sec-tag">Produits populaires</div>
-      <div class="sec-title">Par marque</div>
+      <h2 class="sec-title">Par marque</h2>
     </div>
     <a href="<?= SITE_URL ?>/catalogue.php" class="sec-link">Tout voir →</a>
   </div>
@@ -530,7 +530,7 @@ function prod_card($p, $badge='') {
   <div class="sec-header">
     <div>
       <div class="sec-tag">Nos engagements</div>
-      <div class="sec-title">Pourquoi nous choisir ?</div>
+      <h2 class="sec-title">Pourquoi nous choisir ?</h2>
     </div>
   </div>
   <div class="why-grid-v4">
@@ -566,7 +566,7 @@ function prod_card($p, $badge='') {
   <div class="sec-header">
     <div>
       <div class="sec-tag">Témoignages</div>
-      <div class="sec-title">Avis clients vérifiés</div>
+      <h2 class="sec-title">Avis clients vérifiés</h2>
     </div>
     <div style="display:flex;align-items:center;gap:6px">
       <span style="font-size:20px;font-weight:900;color:#111">4.9</span>
@@ -601,27 +601,29 @@ function prod_card($p, $badge='') {
   <div class="sec-header">
     <div>
       <div class="sec-tag">Conseils &amp; Guides</div>
-      <div class="sec-title">Articles récents</div>
+      <h2 class="sec-title">Articles récents</h2>
     </div>
     <a href="<?= SITE_URL ?>/blog.php" class="sec-link">Voir tous les articles →</a>
   </div>
   <div class="blog-grid-v4">
-    <?php foreach([
-      ['Guide','Comment changer son écran Samsung sans aller chez un réparateur ?','Étape par étape, notre guide complet pour remplacer vous-même votre écran Samsung A-series...','#EFF6FF','#BFDBFE'],
-      ['Conseil','Comment choisir la bonne batterie pour son iPhone 11, 12 ou 13 ?','Toutes les batteries ne se valent pas. Voici les critères essentiels pour bien choisir...','#ECFDF5','#A7F3D0'],
-      ['Test','Écran INCELL vs OLED : Lequel choisir selon votre budget ?','On a testé les deux types d\'écran pendant 2 mois. Notre verdict complet pour vous aider...','#FFF7ED','#FED7AA'],
-    ] as [$tag,$title,$excerpt,$bg,$ico_bg]): ?>
-    <a href="<?= SITE_URL ?>/blog/
+    <?php
+    $blog_articles = [
+      ['Guide',   'changer-ecran-samsung',   'Comment changer son écran Samsung sans aller chez un réparateur ?', 'Étape par étape, notre guide complet pour remplacer vous-même votre écran Samsung A-series...', '#EFF6FF','#BFDBFE'],
+      ['Conseil', 'choisir-batterie-iphone', 'Comment choisir la bonne batterie pour son iPhone 11, 12 ou 13 ?', 'Toutes les batteries ne se valent pas. Voici les critères essentiels pour bien choisir...',       '#ECFDF5','#A7F3D0'],
+      ['Test',    'incell-vs-oled',          'Écran INCELL vs OLED : Lequel choisir selon votre budget ?',        'On a testé les deux types d\'écran pendant 2 mois. Notre verdict complet pour vous aider...',   '#FFF7ED','#FED7AA'],
+    ];
+    foreach($blog_articles as [$tag,$slug,$title,$excerpt,$bg,$ico_bg]): ?>
+    <a href="<?= SITE_URL ?>/blog/<?= e($slug) ?>.php" class="blog-v4">
       <div class="blog-img-v4" style="background:<?= $bg ?>">
-        <span class="blog-tag-v4"><?= $tag ?></span>
+        <span class="blog-tag-v4"><?= e($tag) ?></span>
         <div style="width:80px;height:50px;border-radius:8px;background:<?= $ico_bg ?>;opacity:.5"></div>
       </div>
       <div class="blog-body-v4">
-        <div class="blog-title-v4"><?= $title ?></div>
-        <div class="blog-excerpt-v4"><?= $excerpt ?></div>
-        <div class="blog-cta-v4">Lire l'article <i class="fas fa-arrow-right" style="font-size:9px"></i></div>
+        <div class="blog-title-v4"><?= e($title) ?></div>
+        <div class="blog-excerpt-v4"><?= e($excerpt) ?></div>
+        <div class="blog-cta-v4">Lire l'article <i class="fas fa-arrow-right" style="font-size:9px" aria-hidden="true"></i></div>
       </div>
-    </div>
+    </a>
     <?php endforeach; ?>
   </div>
 </div>

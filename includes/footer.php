@@ -1,4 +1,6 @@
 
+</main><!-- /#main-content -->
+
 <!-- ══ FOOTER REPARE-MOI CI ══ -->
 <footer class="site-footer">
   <div class="footer-top">

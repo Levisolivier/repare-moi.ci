@@ -10,12 +10,10 @@ document.addEventListener('DOMContentLoaded', function () {
       var tabId = this.dataset.tab;
       if (!tabId) return;
 
-      // Désactiver tous les boutons du même header
       var header = this.closest('.tabs-header');
       header.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
       this.classList.add('active');
 
-      // Masquer tous les panes du même wrap
       var body = this.closest('.tabs-wrap').querySelector('.tabs-body');
       body.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
 
@@ -29,13 +27,40 @@ document.addEventListener('DOMContentLoaded', function () {
   var menu   = document.getElementById('nav-menu');
   if (toggle && menu) {
     toggle.addEventListener('click', function () {
-      menu.classList.toggle('open');
+      var isOpen = menu.classList.toggle('open');
+      toggle.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      toggle.setAttribute('aria-label', isOpen ? 'Fermer le menu' : 'Ouvrir le menu');
     });
+
     // Fermer au clic extérieur
     document.addEventListener('click', function (e) {
       if (!toggle.contains(e.target) && !menu.contains(e.target)) {
         menu.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.setAttribute('aria-label', 'Ouvrir le menu');
       }
+    });
+
+    // Fermer avec la touche Echap
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'Escape' && menu.classList.contains('open')) {
+        menu.classList.remove('open');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.focus();
+      }
+    });
+
+    // Support clavier des items avec dropdown (mobile)
+    menu.querySelectorAll('li > a[aria-haspopup]').forEach(function (link) {
+      link.addEventListener('click', function (e) {
+        if (window.innerWidth <= 768) {
+          e.preventDefault();
+          var li = this.closest('li');
+          var wasOpen = li.classList.contains('open');
+          menu.querySelectorAll('li.open').forEach(function (el) { el.classList.remove('open'); });
+          if (!wasOpen) li.classList.add('open');
+        }
+      });
     });
   }
 
@@ -51,9 +76,12 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   /* ── Add to cart : feedback visuel ────────────────────── */
-  document.querySelectorAll('.form-add').forEach(function (form) {
+  // Sélectionne tous les formulaires d'ajout au panier (action=ajouter)
+  document.querySelectorAll('form[action*="panier.php"]').forEach(function (form) {
+    var actionInput = form.querySelector('input[name="action"]');
+    if (!actionInput || actionInput.value !== 'ajouter') return;
     form.addEventListener('submit', function () {
-      var btn = form.querySelector('.btn-add');
+      var btn = form.querySelector('button[type="submit"]');
       if (btn && !btn.disabled) {
         var orig = btn.innerHTML;
         btn.innerHTML = '<i class="fas fa-check"></i> Ajouté !';
@@ -73,19 +101,22 @@ document.addEventListener('DOMContentLoaded', function () {
       header.style.boxShadow = window.scrollY > 20
         ? '0 4px 16px rgba(0,0,0,.5)'
         : '0 2px 8px rgba(0,0,0,.4)';
-    });
+    }, { passive: true });
   }
 
   /* ── Smooth scroll pour ancres ─────────────────────────── */
-  document.querySelectorAll('a[href^="#"]').forEach(function (a) {
-    a.addEventListener('click', function (e) {
-      var id = this.getAttribute('href').slice(1);
-      var el = document.getElementById(id);
-      if (el) {
-        e.preventDefault();
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      }
+  var prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!prefersReducedMotion) {
+    document.querySelectorAll('a[href^="#"]').forEach(function (a) {
+      a.addEventListener('click', function (e) {
+        var id = this.getAttribute('href').slice(1);
+        var el = document.getElementById(id);
+        if (el) {
+          e.preventDefault();
+          el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+      });
     });
-  });
+  }
 
 });

@@ -18,8 +18,8 @@ $similaires = $similaires_st->fetchAll();
 
 $rupture   = $p['stock'] < 1;
 $img       = $p['image'] ? (strpos($p['image'],'http')===0 ? $p['image'] : UPLOAD_URL.$p['image']) : '';
-$pageTitle = e($p['nom']) . ' — Repare-Moi';
-$pageDesc  = 'Achetez '.e($p['nom']).' à '.prix((int)$p['prix']).'. Qualité garantie, livraison rapide CI.';
+$pageTitle = $p['nom'] . ' — Repare-Moi';
+$pageDesc  = 'Achetez ' . $p['nom'] . ' à ' . prix((int)$p['prix']) . '. Qualité garantie, livraison rapide CI.';
 
 require_once __DIR__ . '/includes/header.php';
 ?>
