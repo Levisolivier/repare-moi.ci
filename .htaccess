@@ -9,13 +9,19 @@ ServerSignature Off
     Header always set Referrer-Policy "strict-origin-when-cross-origin"
 </IfModule>
 
-# ── Protéger les dossiers sensibles ──────────────────────
+# ── Protéger les fichiers sensibles ──────────────────────
 <FilesMatch "\.(sql|log|env|gs)$">
     Order Allow,Deny
     Deny from all
 </FilesMatch>
 
-# ── Bloquer accès direct au dossier config ────────────────
+# ── Bloquer les fichiers ERP legacy ──────────────────────
+<FilesMatch "^erp">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# ── Bloquer accès direct aux dossiers config/includes ─────
 <IfModule mod_rewrite.c>
     RewriteEngine On
     RewriteRule ^config/ - [F,L]

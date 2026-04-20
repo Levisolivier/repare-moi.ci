@@ -36,7 +36,8 @@ function slug($s) {
     $s = str_replace(['î','ï'], 'i', $s);
     $s = str_replace(['ç'], 'c', $s);
     $s = preg_replace('/[^a-z0-9\s-]/', '', $s);
-    return preg_replace('/[\s-]+/', '-', $s);
+    $s = preg_replace('/[\s-]+/', '-', $s);
+    return trim($s, '-');
 }
 
 /* ── Formatage ───────────────────────────────────────────── */
@@ -46,7 +47,7 @@ function prix($n) {
 }
 
 function ref_commande() {
-    return 'RM-' . strtoupper(substr(uniqid(), -6)) . '-' . date('Y');
+    return 'RM-' . strtoupper(bin2hex(random_bytes(3))) . '-' . date('Y');
 }
 
 /* ── Auth client ─────────────────────────────────────────── */
@@ -158,7 +159,7 @@ function panier_ajouter($id, $qty = 1) {
         $_SESSION['panier'][$id]['qty'] = min($_SESSION['panier'][$id]['qty'] + $qty, $p['stock']);
     } else {
         $_SESSION['panier'][$id] = ['produit_id'=>$id,'nom'=>$p['nom'],'prix'=>$p['prix'],
-                                    'qty'=>$qty,'image'=>$p['image'],'marque'=>$p['marque']];
+                                    'qty'=>min($qty, $p['stock']),'image'=>$p['image'],'marque'=>$p['marque']];
     }
     return true;
 }
@@ -255,12 +256,16 @@ function flash_get() {
 /* ── Upload image ────────────────────────────────────────── */
 
 function upload_image($file, $prefix = "prod") {
-    $allowed = ['image/jpeg', 'image/png', 'image/webp'];
-    if (!in_array($file['type'], $allowed)) return false;
     if ($file['size'] > 2 * 1024 * 1024) return false;
 
-    $ext  = pathinfo($file['name'], PATHINFO_EXTENSION);
-    $name = $prefix . '_' . uniqid() . '.' . $ext;
+    // Vérification du type MIME réel (pas le champ client-contrôlé $_FILES['type'])
+    $finfo    = new finfo(FILEINFO_MIME_TYPE);
+    $mime     = $finfo->file($file['tmp_name']);
+    $mime_ext = ['image/jpeg'=>'jpg', 'image/png'=>'png', 'image/webp'=>'webp'];
+    if (!isset($mime_ext[$mime])) return false;
+
+    $ext  = $mime_ext[$mime];
+    $name = $prefix . '_' . bin2hex(random_bytes(8)) . '.' . $ext;
     $dest = UPLOAD_DIR . $name;
 
     if (!is_dir(UPLOAD_DIR)) mkdir(UPLOAD_DIR, 0755, true);

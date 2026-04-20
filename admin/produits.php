@@ -37,9 +37,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($action === 'creer') {
             // Rendre le slug unique
             $base = $data['slug']; $i = 0;
-            while ($pdo->prepare('SELECT id FROM rm_produits WHERE slug=?')->execute([$data['slug']]) &&
-                   $pdo->query('SELECT id FROM rm_produits WHERE slug="'.$data['slug'].'"')->fetch()) {
+            $st_slug = $pdo->prepare('SELECT id FROM rm_produits WHERE slug=?');
+            $st_slug->execute([$data['slug']]);
+            while ($st_slug->fetch()) {
                 $data['slug'] = $base . '-' . (++$i);
+                $st_slug->execute([$data['slug']]);
             }
             $st = $pdo->prepare('INSERT INTO rm_produits (nom,slug,marque,categorie,serie,prix,stock,description,deal,actif,image) VALUES (?,?,?,?,?,?,?,?,?,?,?)');
             $st->execute([$data['nom'],$data['slug'],$data['marque'],$data['categorie'],$data['serie'],
@@ -84,7 +86,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // ── LECTURE ─────────────────────────────────────────────
 $edit_id = (int)($_GET['edit'] ?? 0);
-$edit    = $edit_id ? $pdo->query("SELECT * FROM rm_produits WHERE id=$edit_id")->fetch() : null;
+if ($edit_id) {
+    $st_edit = $pdo->prepare('SELECT * FROM rm_produits WHERE id=?');
+    $st_edit->execute([$edit_id]);
+    $edit = $st_edit->fetch() ?: null;
+} else {
+    $edit = null;
+}
 $nouveau = isset($_GET['action']) && $_GET['action']==='nouveau';
 
 $filtre  = $_GET['filtre'] ?? '';
@@ -101,7 +109,7 @@ $st->execute($bind);
 $produits = $st->fetchAll();
 
 $marques_opts  = ['Samsung','iPhone','Huawei','Xiaomi','Motorola','LG','Nokia','Google Pixel','Oppo','Divers'];
-$cats_opts     = ['Écrans','Batteries','Anti-choc','Tablettes','Divers'];
+$cats_opts     = ['Écran','Batterie','Vitre','Connecteur','Caméra','Haut-parleur','Microphone','Nappe','Chassis','Coque arrière','Autre'];
 ?>
 <!DOCTYPE html>
 <html lang="fr">
@@ -121,6 +129,7 @@ $cats_opts     = ['Écrans','Batteries','Anti-choc','Tablettes','Divers'];
     <a href="<?= SITE_URL ?>/admin/produits.php" class="active"><i class="fas fa-box"></i> Produits</a>
     <a href="<?= SITE_URL ?>/admin/sync_sheets.php"><i class="fas fa-sync-alt"></i> Sync Sheets</a>
     <a href="<?= SITE_URL ?>/admin/commandes.php"><i class="fas fa-shopping-bag"></i> Commandes</a>
+    <a href="<?= SITE_URL ?>/admin/clients.php"><i class="fas fa-users"></i> Clients</a>
     <hr>
     <a href="<?= SITE_URL ?>/" target="_blank"><i class="fas fa-external-link-alt"></i> Voir le site</a>
     <a href="<?= SITE_URL ?>/admin/logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
