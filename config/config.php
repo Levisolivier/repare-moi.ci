@@ -9,7 +9,8 @@ define('SITE_URL',    'https://repare-moi.ci');       // Sans slash final
 define('SITE_EMAIL',  'info@repare-moi.ci');
 define('SITE_TEL1',   '+2250545362890');
 define('SITE_TEL2',   '+2250707907719');
-define('SITE_WHATSAPP', '2250545362890');
+define('SITE_WHATSAPP',       '2250545362890');
+define('PHONE_COUNTRY_CODE',  '225');           // Indicatif CI
 
 // Devise
 define('DEVISE',      'FCFA');

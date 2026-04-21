@@ -32,22 +32,7 @@ $statuts_labels = ['en_attente'=>'En attente','confirmee'=>'Confirmée','en_cour
 <body class="admin-body">
 
 <!-- SIDEBAR -->
-<aside class="admin-sidebar">
-  <div class="admin-logo">
-    <span>Repare<em>Moi</em></span>
-    <small>Administration</small>
-  </div>
-  <nav class="admin-nav">
-    <a href="<?= SITE_URL ?>/admin/" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-    <a href="<?= SITE_URL ?>/admin/produits.php"><i class="fas fa-box"></i> Produits <span class="badge-nav"><?= $nb_produits ?></span></a>
-    <a href="<?= SITE_URL ?>/admin/sync_sheets.php"><i class="fas fa-sync-alt"></i> Sync Sheets</a>
-    <a href="<?= SITE_URL ?>/admin/commandes.php"><i class="fas fa-shopping-bag"></i> Commandes <?= $en_attente>0?"<span class='badge-nav badge-alert'>$en_attente</span>":'' ?></a>
-    <a href="<?= SITE_URL ?>/admin/clients.php"><i class="fas fa-users"></i> Clients</a>
-    <hr>
-    <a href="<?= SITE_URL ?>/" target="_blank"><i class="fas fa-external-link-alt"></i> Voir le site</a>
-    <a href="<?= SITE_URL ?>/admin/logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
-  </nav>
-</aside>
+<?php include __DIR__ . '/partials/sidebar.php'; ?>
 
 <!-- CONTENU -->
 <main class="admin-main">

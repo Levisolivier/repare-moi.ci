@@ -30,8 +30,6 @@ if ($filtre === 'actifs') {
 $whereStr = implode(' AND ', $where);
 
 // Total
-$total = (int)$pdo->prepare("SELECT COUNT(*) FROM rm_clients c WHERE $whereStr")->execute($params) ?
-         $pdo->prepare("SELECT COUNT(*) FROM rm_clients c WHERE $whereStr")->execute($params) && 0 : 0;
 $stmt_count = $pdo->prepare("SELECT COUNT(*) FROM rm_clients c WHERE $whereStr");
 $stmt_count->execute($params);
 $total = (int)$stmt_count->fetchColumn();
@@ -90,28 +88,8 @@ $stats = $pdo->query("
 .popup-box { background:#fff; border-radius:12px; padding:32px; max-width:520px; width:90%; max-height:80vh; overflow-y:auto; }
 </style>
 </head>
-<body>
-<div class="admin-layout">
-
-  <!-- Sidebar -->
-  <aside class="admin-sidebar">
-    <div class="sidebar-brand">
-      <span>Repare<em>Moi</em></span>
-      <small>Administration</small>
-    </div>
-    <nav class="admin-nav">
-      <a href="<?= SITE_URL ?>/admin/"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
-      <a href="<?= SITE_URL ?>/admin/produits.php"><i class="fas fa-box"></i> Produits</a>
-      <a href="<?= SITE_URL ?>/admin/sync_sheets.php"><i class="fas fa-sync-alt"></i> Sync Sheets</a>
-      <a href="<?= SITE_URL ?>/admin/commandes.php"><i class="fas fa-shopping-bag"></i> Commandes</a>
-      <a href="<?= SITE_URL ?>/admin/clients.php" class="active"><i class="fas fa-users"></i> Clients <span class="badge-nav"><?= $stats['total'] ?></span></a>
-    </nav>
-    <div class="sidebar-footer">
-      <a href="<?= SITE_URL ?>" target="_blank"><i class="fas fa-external-link-alt"></i> Voir le site</a>
-      <a href="<?= SITE_URL ?>/admin/logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
-    </div>
-  </aside>
-
+<body class="admin-body">
+  <?php include __DIR__ . '/partials/sidebar.php'; ?>
   <main class="admin-main">
     <div class="admin-header">
       <h1><i class="fas fa-users" style="color:#f76b1c"></i> Clients</h1>
@@ -227,7 +205,10 @@ $stats = $pdo->query("
               </span>
             </td>
             <td style="padding:12px 16px;text-align:center">
-              <button onclick="voirClient(<?= htmlspecialchars(json_encode($c)) ?>)"
+              <?php
+              $c_safe = array_diff_key($c, array_flip(['password']));
+              ?>
+              <button onclick="voirClient(<?= htmlspecialchars(json_encode($c_safe), ENT_QUOTES, 'UTF-8') ?>)"
                       style="background:#f76b1c;color:#fff;border:none;border-radius:6px;padding:5px 12px;cursor:pointer;font-size:12px">
                 <i class="fas fa-eye"></i> Voir
               </button>
@@ -252,7 +233,6 @@ $stats = $pdo->query("
     </div>
     <?php endif; ?>
   </main>
-</div>
 
 <!-- Popup détail client -->
 <div class="detail-popup" id="popup">
@@ -266,6 +246,7 @@ $stats = $pdo->query("
 </div>
 
 <script>
+var COUNTRY_CODE = '<?= PHONE_COUNTRY_CODE ?>';
 function voirClient(c) {
   document.getElementById('popup-titre').textContent = c.prenom + ' ' + c.nom;
   document.getElementById('popup-content').innerHTML = `
@@ -294,7 +275,7 @@ function voirClient(c) {
       <a href="mailto:${c.email}" style="flex:1;text-align:center;background:#f76b1c;color:#fff;padding:10px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
         <i class="fas fa-envelope"></i> Envoyer un email
       </a>
-      ${c.telephone ? `<a href="https://wa.me/225${c.telephone.replace(/\D/g,'')}" target="_blank"
+      ${c.telephone ? `<a href="https://wa.me/${COUNTRY_CODE}${c.telephone.replace(/\D/g,'')}" target="_blank"
         style="flex:1;text-align:center;background:#25d366;color:#fff;padding:10px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600">
         <i class="fab fa-whatsapp"></i> WhatsApp
       </a>` : ''}
