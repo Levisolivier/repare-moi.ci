@@ -69,8 +69,8 @@ $prix_stats     = $pdo->query('SELECT MIN(prix) mn, MAX(prix) mx FROM rm_produit
 $pmin_global    = (int)($prix_stats['mn'] ?? 0);
 $pmax_global    = (int)($prix_stats['mx'] ?? 200000);
 
-$titre = $marque ?: ($categorie ?: ($q ? "\"$q\"" : 'Tous les produits'));
-$pageTitle = e($titre).' — REPARE-MOI CI';
+$titre = $marque ?: ($categorie ?: ($q ? '"'.$q.'"' : 'Tous les produits'));
+$pageTitle = $titre . ' — REPARE-MOI CI';
 
 require_once __DIR__ . '/includes/header.php';
 

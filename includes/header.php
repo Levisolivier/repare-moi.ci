@@ -3,15 +3,27 @@ require_once __DIR__ . '/../includes/fonctions.php';
 $flash  = flash_get();
 $nbPanier = panier_count();
 $currentPage = basename($_SERVER['PHP_SELF']);
+$canonical = SITE_URL . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 ?>
 <!DOCTYPE html>
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title><?= e($pageTitle ?? SITE_NOM) ?> — Pièces smartphones CI</title>
-<meta name="description" content="<?= e($pageDesc ?? 'Pièces détachées smartphones pas chers en Côte d\'Ivoire. Samsung, iPhone, Huawei, Xiaomi. Livraison Abidjan.') ?>">
+<title><?= htmlspecialchars($pageTitle ?? SITE_NOM, ENT_QUOTES, 'UTF-8') ?> — Pièces smartphones CI</title>
+<meta name="description" content="<?= htmlspecialchars($pageDesc ?? 'Pièces détachées smartphones pas chers en Côte d\'Ivoire. Samsung, iPhone, Huawei, Xiaomi. Livraison Abidjan.', ENT_QUOTES, 'UTF-8') ?>">
+<link rel="canonical" href="<?= e($canonical) ?>">
+<!-- Open Graph -->
+<meta property="og:type"        content="website">
+<meta property="og:site_name"   content="<?= e(SITE_NOM) ?>">
+<meta property="og:title"       content="<?= htmlspecialchars($pageTitle ?? SITE_NOM, ENT_QUOTES, 'UTF-8') ?>">
+<meta property="og:description" content="<?= htmlspecialchars($pageDesc ?? 'Pièces détachées smartphones en Côte d\'Ivoire.', ENT_QUOTES, 'UTF-8') ?>">
+<meta property="og:url"         content="<?= e($canonical) ?>">
+<!-- Preconnect & DNS prefetch -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://www.googletagmanager.com">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700;900&family=Open+Sans:wght@400;600;700&family=Roboto:wght@700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="<?= SITE_URL ?>/assets/css/style.css">
@@ -35,11 +47,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 </head>
 <body>
 
+<!-- Skip navigation for keyboard/screen-reader users -->
+<a class="skip-link" href="#main-content">Aller au contenu principal</a>
+
 <?php if ($flash): ?>
-<div class="flash flash-<?= e($flash['type']) ?>" id="flash-msg">
-  <i class="fas fa-<?= $flash['type']==='success' ? 'check-circle' : 'exclamation-circle' ?>"></i>
+<div class="flash flash-<?= e($flash['type']) ?>" id="flash-msg" role="alert" aria-live="polite">
+  <i class="fas fa-<?= $flash['type']==='success' ? 'check-circle' : ($flash['type']==='warning' ? 'exclamation-triangle' : 'exclamation-circle') ?>" aria-hidden="true"></i>
   <?= e($flash['msg']) ?>
-  <button onclick="this.parentElement.remove()">×</button>
+  <button onclick="this.parentElement.remove()" aria-label="Fermer le message">×</button>
 </div>
 <?php endif; ?>
 
@@ -48,17 +63,17 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <div class="container">
     <div class="topbar-inner">
       <div class="topbar-left">
-        <a href="tel:<?= SITE_TEL1 ?>"><i class="fas fa-phone"></i><?= SITE_TEL1 ?></a>
-        <a href="tel:<?= SITE_TEL2 ?>"><i class="fas fa-phone"></i><?= SITE_TEL2 ?></a>
-        <a href="mailto:<?= SITE_EMAIL ?>"><i class="fas fa-envelope"></i><?= SITE_EMAIL ?></a>
+        <a href="tel:<?= SITE_TEL1 ?>"><i class="fas fa-phone" aria-hidden="true"></i><?= SITE_TEL1 ?></a>
+        <a href="tel:<?= SITE_TEL2 ?>"><i class="fas fa-phone" aria-hidden="true"></i><?= SITE_TEL2 ?></a>
+        <a href="mailto:<?= SITE_EMAIL ?>"><i class="fas fa-envelope" aria-hidden="true"></i><?= SITE_EMAIL ?></a>
       </div>
       <div class="topbar-right">
         <?php if (client_connecte()): $cl = client(); ?>
-          <a href="<?= SITE_URL ?>/compte.php"><i class="fas fa-user"></i> <?= e($cl['prenom']) ?></a>
-          <a href="<?= SITE_URL ?>/deconnexion.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
+          <a href="<?= SITE_URL ?>/compte.php"><i class="fas fa-user" aria-hidden="true"></i> <?= e($cl['prenom']) ?></a>
+          <a href="<?= SITE_URL ?>/deconnexion.php"><i class="fas fa-sign-out-alt" aria-hidden="true"></i> Déconnexion</a>
         <?php else: ?>
-          <a href="<?= SITE_URL ?>/connexion.php"><i class="fas fa-sign-in-alt"></i> Connexion</a>
-          <a href="<?= SITE_URL ?>/inscription.php"><i class="fas fa-user-plus"></i> Créer un compte</a>
+          <a href="<?= SITE_URL ?>/connexion.php"><i class="fas fa-sign-in-alt" aria-hidden="true"></i> Connexion</a>
+          <a href="<?= SITE_URL ?>/inscription.php"><i class="fas fa-user-plus" aria-hidden="true"></i> Créer un compte</a>
         <?php endif; ?>
       </div>
     </div>
@@ -70,7 +85,6 @@ $currentPage = basename($_SERVER['PHP_SELF']);
   <div class="container">
     <div class="header-inner">
       <a href="<?= SITE_URL ?>/" class="logo logo-link" aria-label="REPARE-MOI CI - Accueil">
-        <!-- Logo SVG inline — fond transparent, adaptatif -->
         <svg class="logo-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 52" width="200" height="48" aria-hidden="true">
           <defs>
             <linearGradient id="lgrd" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -78,48 +92,37 @@ $currentPage = basename($_SERVER['PHP_SELF']);
               <stop offset="100%" stop-color="#E86808"/>
             </linearGradient>
           </defs>
-          <!-- Phone body -->
           <rect x="6" y="4" width="29" height="44" rx="5" fill="url(#lgrd)" filter="drop-shadow(0 3px 6px rgba(240,120,24,0.35))"/>
-          <!-- Screen -->
           <rect x="9" y="10" width="23" height="29" rx="2" fill="#0f172a" opacity="0.88"/>
-          <!-- Screen glow -->
           <rect x="9" y="10" width="10" height="29" rx="2" fill="white" opacity="0.04"/>
-          <!-- Speaker -->
           <rect x="15" y="6" width="10" height="2.5" rx="1.2" fill="white" opacity="0.4"/>
-          <!-- Home btn -->
           <circle cx="20" cy="41.5" r="3" fill="white" opacity="0.22"/>
           <circle cx="20" cy="41.5" r="1.6" fill="white" opacity="0.38"/>
-          <!-- Screen lines -->
           <rect x="12" y="16" width="17" height="2.5" rx="1" fill="#FF8C3A" opacity="0.85"/>
           <rect x="12" y="21" width="12" height="1.5" rx="0.75" fill="white" opacity="0.28"/>
           <rect x="12" y="24.5" width="15" height="1.5" rx="0.75" fill="white" opacity="0.22"/>
           <rect x="12" y="28" width="9" height="1.5" rx="0.75" fill="white" opacity="0.18"/>
-          <!-- R letter -->
           <text x="20" y="34" font-family="Arial Black,Arial" font-size="10" font-weight="900" fill="#FF8C3A" text-anchor="middle" opacity="0.9">R</text>
-          <!-- REPARE-MOI text -->
           <text x="46" y="30" font-family="Montserrat,Arial Black,Arial" font-size="19.5" font-weight="900" fill="white" letter-spacing="0.3">REPARE-MOI</text>
-          <!-- CI in orange -->
           <text x="188" y="30" font-family="Montserrat,Arial Black,Arial" font-size="19.5" font-weight="900" fill="#F07818" letter-spacing="0.3"> CI</text>
-          <!-- Tagline -->
           <text x="46" y="44" font-family="Open Sans,Arial" font-size="10" fill="#94a3b8" letter-spacing="1.1">Réparez sans vous ruiner !</text>
-          <!-- Accent bar -->
           <rect x="46" y="47.5" width="60" height="1.8" rx="0.9" fill="#F07818" opacity="0.55"/>
         </svg>
       </a>
-      <form class="search-bar" action="<?= SITE_URL ?>/catalogue.php" method="get">
-        <select name="marque">
+      <form class="search-bar" action="<?= SITE_URL ?>/catalogue.php" method="get" role="search" aria-label="Rechercher une pièce">
+        <select name="marque" aria-label="Filtrer par marque">
           <option value="">Toutes</option>
           <?php foreach(['Samsung','iPhone','Huawei','Xiaomi','Motorola','LG','Nokia','Google Pixel','Oppo'] as $m): ?>
           <option value="<?= e($m) ?>" <?= ($_GET['marque']??'')===$m?'selected':'' ?>><?= e($m) ?></option>
           <?php endforeach; ?>
         </select>
-        <input type="text" name="q" placeholder="Rechercher une pièce, un modèle..." value="<?= e($_GET['q']??'') ?>">
-        <button type="submit"><i class="fas fa-search"></i></button>
+        <input type="text" name="q" placeholder="Rechercher une pièce, un modèle..." value="<?= e($_GET['q']??'') ?>" aria-label="Terme de recherche">
+        <button type="submit" aria-label="Lancer la recherche"><i class="fas fa-search" aria-hidden="true"></i></button>
       </form>
       <div class="header-actions">
-        <a href="<?= SITE_URL ?>/panier.php" class="btn-cart">
-          <i class="fas fa-shopping-cart"></i> Panier
-          <span class="cart-count" id="cart-count"><?= $nbPanier ?></span>
+        <a href="<?= SITE_URL ?>/panier.php" class="btn-cart" aria-label="Panier (<?= $nbPanier ?> article<?= $nbPanier > 1 ? 's' : '' ?>)">
+          <i class="fas fa-shopping-cart" aria-hidden="true"></i> <span class="cart-label">Panier</span>
+          <span class="cart-count" id="cart-count" aria-hidden="true"><?= $nbPanier ?></span>
         </a>
       </div>
     </div>
@@ -127,14 +130,14 @@ $currentPage = basename($_SERVER['PHP_SELF']);
 </header>
 
 <!-- NAV -->
-<nav class="main-nav">
+<nav class="main-nav" aria-label="Navigation principale">
   <div class="container">
-    <button class="nav-toggle" onclick="this.closest('nav').querySelector('.nav-menu').classList.toggle('open')" id="nav-toggle" aria-label="Menu">
-      <i class="fas fa-bars"></i>
+    <button class="nav-toggle" id="nav-toggle" aria-label="Ouvrir le menu" aria-expanded="false" aria-controls="nav-menu">
+      <i class="fas fa-bars" aria-hidden="true"></i>
     </button>
-    <ul class="nav-menu" id="nav-menu">
+    <ul class="nav-menu" id="nav-menu" role="list">
       <li><a href="<?= SITE_URL ?>/" class="<?= $currentPage==='index.php'?'active':'' ?>">Accueil</a></li>
-      <li><a href="<?= SITE_URL ?>/boutique.php" class="<?= $currentPage==='boutique.php'?'active':'' ?>" style="color:var(--primary)"><i class="fas fa-store"></i> Boutique</a></li>
+      <li><a href="<?= SITE_URL ?>/boutique.php" class="<?= $currentPage==='boutique.php'?'active':'' ?>" style="color:var(--primary)"><i class="fas fa-store" aria-hidden="true"></i> Boutique</a></li>
       <?php
       $marques = ['Samsung','iPhone','Huawei','Xiaomi','Motorola','LG','Nokia','Google Pixel','Oppo'];
       $cats_icons_nav = [
@@ -157,15 +160,15 @@ $currentPage = basename($_SERVER['PHP_SELF']);
       }
       foreach ($marques as $m): ?>
       <li>
-        <a href="<?= SITE_URL ?>/catalogue.php?marque=<?= urlencode($m) ?>"><?= e($m) ?> <i class="fas fa-chevron-down"></i></a>
-        <div class="dropdown">
+        <a href="<?= SITE_URL ?>/catalogue.php?marque=<?= urlencode($m) ?>" aria-haspopup="true"><?= e($m) ?> <i class="fas fa-chevron-down" aria-hidden="true"></i></a>
+        <div class="dropdown" role="region" aria-label="Catégories <?= e($m) ?>">
           <a href="<?= SITE_URL ?>/catalogue.php?marque=<?= urlencode($m) ?>" style="font-weight:700;color:#F76B1C;border-bottom:1px solid #f0f0f0;padding-bottom:8px;margin-bottom:4px;display:block">
-            <i class="fas fa-th-large"></i> Tout <?= e($m) ?>
+            <i class="fas fa-th-large" aria-hidden="true"></i> Tout <?= e($m) ?>
           </a>
           <?php foreach ($cats_bdd_nav as $c):
             $ico = $cats_icons_nav[$c] ?? '🔧'; ?>
           <a href="<?= SITE_URL ?>/catalogue.php?marque=<?= urlencode($m) ?>&categorie=<?= urlencode($c) ?>">
-            <?= $ico ?> <?= e($c) ?> <?= e($m) ?>
+            <span aria-hidden="true"><?= $ico ?></span> <?= e($c) ?> <?= e($m) ?>
           </a>
           <?php endforeach; ?>
         </div>
@@ -175,3 +178,5 @@ $currentPage = basename($_SERVER['PHP_SELF']);
     </ul>
   </div>
 </nav>
+
+<main id="main-content">

@@ -9,8 +9,8 @@ define('DB_USER', 'u173818135_FS8Nz');
 define('DB_PASS', 'RepareMoi2025!');
 define('DB_CHARSET', 'utf8mb4');
 
-// ⚠️ Remettre à false une fois le site fonctionnel
-define('DB_DEBUG', true);
+// ⚠️ Mettre à true uniquement en développement local — jamais en production
+define('DB_DEBUG', false);
 
 function getPDO() {
     static $pdo = null;

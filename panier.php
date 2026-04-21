@@ -1,6 +1,5 @@
 <?php
 require_once __DIR__ . '/includes/fonctions.php';
-include __DIR__ . '/includes/header.php';
 
 // ── Actions POST ──────────────────────────────────────────
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -13,6 +12,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (panier_ajouter($id, $qty)) flash('Article ajouté au panier ✅');
         else flash('Produit indisponible ou rupture de stock.', 'error');
         $redirect = $_POST['redirect'] ?? '/panier.php';
+        // Valider que le redirect est un chemin interne (commence par /)
+        if (!preg_match('#^/[^/\\\]#', $redirect)) $redirect = '/panier.php';
         header('Location: ' . SITE_URL . $redirect);
         exit;
     }
@@ -145,7 +146,7 @@ require_once __DIR__ . '/includes/header.php';
 
           <div class="form-group">
             <label>Nom complet *</label>
-            <input type="text" name="nom" required value="<?= e($client_data['prenom']??'') . ' ' . e($client_data['nom']??'') ?>">
+            <input type="text" name="nom" required value="<?= e(trim(($client_data['prenom']??'') . ' ' . ($client_data['nom']??''))) ?>">
           </div>
           <div class="form-group">
             <label>Email *</label>

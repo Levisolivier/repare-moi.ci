@@ -5,6 +5,8 @@ if (client_connecte()) { header('Location: ' . SITE_URL . '/compte.php'); exit; 
 
 $erreur  = '';
 $redirect = $_GET['redirect'] ?? '/compte.php';
+// Valider que le redirect est un chemin interne
+if (!preg_match('#^/[^/\\\]#', $redirect)) $redirect = '/compte.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -41,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['client_nom'] = $client['prenom'];
             // Utilisateur migré WP → forcer reset mot de passe
             if (!empty($client['mdp_reset'])) {
-                flash('Bienvenue ' . $client['prenom'] . ' ! Veuillez choisir un nouveau mot de passe pour sécuriser votre compte.', 'error');
+                flash('Bienvenue ' . $client['prenom'] . ' ! Veuillez choisir un nouveau mot de passe pour sécuriser votre compte.', 'warning');
                 header('Location: ' . SITE_URL . '/reset-password.php');
                 exit;
             }

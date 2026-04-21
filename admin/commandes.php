@@ -22,15 +22,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 // Voir détail commande
 $detail_id = (int)($_GET['id'] ?? 0);
 $detail = null;
+$items  = [];
 if ($detail_id) {
-    $detail = $pdo->query("SELECT * FROM rm_commandes WHERE id=$detail_id")->fetch();
-    $items  = $detail ? $pdo->query("SELECT * FROM rm_commandes_items WHERE commande_id=$detail_id")->fetchAll() : [];
+    $st_detail = $pdo->prepare('SELECT * FROM rm_commandes WHERE id=?');
+    $st_detail->execute([$detail_id]);
+    $detail = $st_detail->fetch();
+    if ($detail) {
+        $st_items = $pdo->prepare('SELECT * FROM rm_commandes_items WHERE commande_id=?');
+        $st_items->execute([$detail_id]);
+        $items = $st_items->fetchAll();
+    }
 }
 
 // Liste
+$statuts_valides_filtre = ['en_attente','confirmee','en_cours','livree','annulee'];
 $statut_filtre = $_GET['statut'] ?? '';
-$where = $statut_filtre ? "WHERE statut='$statut_filtre'" : '';
-$commandes = $pdo->query("SELECT * FROM rm_commandes $where ORDER BY created_at DESC")->fetchAll();
+if ($statut_filtre && !in_array($statut_filtre, $statuts_valides_filtre)) $statut_filtre = '';
+if ($statut_filtre) {
+    $st_list = $pdo->prepare('SELECT * FROM rm_commandes WHERE statut=? ORDER BY created_at DESC');
+    $st_list->execute([$statut_filtre]);
+} else {
+    $st_list = $pdo->query('SELECT * FROM rm_commandes ORDER BY created_at DESC');
+}
+$commandes = $st_list->fetchAll();
 
 $statuts = ['en_attente'=>['warning','En attente'],'confirmee'=>['info','Confirmée'],'en_cours'=>['primary','En cours'],'livree'=>['success','Livrée'],'annulee'=>['danger','Annulée']];
 $paiements = ['orange_money'=>'Orange Money','mtn_money'=>'MTN Money','wave'=>'Wave','moov'=>'Moov Money','especes'=>'Livraison'];
@@ -51,7 +65,9 @@ $paiements = ['orange_money'=>'Orange Money','mtn_money'=>'MTN Money','wave'=>'W
   <nav class="admin-nav">
     <a href="<?= SITE_URL ?>/admin/"><i class="fas fa-tachometer-alt"></i> Dashboard</a>
     <a href="<?= SITE_URL ?>/admin/produits.php"><i class="fas fa-box"></i> Produits</a>
+    <a href="<?= SITE_URL ?>/admin/sync_sheets.php"><i class="fas fa-sync-alt"></i> Sync Sheets</a>
     <a href="<?= SITE_URL ?>/admin/commandes.php" class="active"><i class="fas fa-shopping-bag"></i> Commandes</a>
+    <a href="<?= SITE_URL ?>/admin/clients.php"><i class="fas fa-users"></i> Clients</a>
     <hr>
     <a href="<?= SITE_URL ?>/" target="_blank"><i class="fas fa-external-link-alt"></i> Voir le site</a>
     <a href="<?= SITE_URL ?>/admin/logout.php"><i class="fas fa-sign-out-alt"></i> Déconnexion</a>
