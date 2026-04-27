@@ -573,6 +573,8 @@ var SET  = JSON.parse(localStorage.getItem('erp_s')||'{"faible":5,"devise":"FCFA
 var CU = null, prods = [], ventes = [], reparations = [], ctM = 'wa';
 var cart = []; // panier multi-articles
 var charts = {};
+var usersCache = [];          // cache des utilisateurs ERP pour les sélecteurs
+function gU(){ return usersCache; }
 
 // ══ USERS ══
 // ─ API helpers ─
@@ -1034,6 +1036,7 @@ async function rUsersGrid(){
   try{
     var r=await apiPHPGet('users_list');
     if(!r.ok)throw new Error(r.error);
+    usersCache = r.users; // alimente gU() pour les sélecteurs de réparateurs
     grid.innerHTML=r.users.map(u=>{
       var ini=u.nom.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
       var isMe=u.login===CU.login;

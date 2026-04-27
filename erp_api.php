@@ -74,7 +74,7 @@ function installTables() {
         login      VARCHAR(50)  NOT NULL,
         expires_at DATETIME     NOT NULL,
         ip         VARCHAR(45)  NULL,
-        ua         VARCHAR(255) NULL,
+        user_agent VARCHAR(255) NULL,
         created_at DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
         INDEX idx_login (login),
         INDEX idx_expires (expires_at)
@@ -90,6 +90,14 @@ function installTables() {
         INDEX idx_login (user_login),
         INDEX idx_date (created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4");
+
+    // Migration : renommer l'ancienne colonne 'ua' en 'user_agent' si nécessaire
+    try {
+        $old = $db->query("SHOW COLUMNS FROM erp_sessions LIKE 'ua'")->fetchAll();
+        if (!empty($old)) {
+            $db->exec("ALTER TABLE erp_sessions CHANGE ua user_agent VARCHAR(255) NULL");
+        }
+    } catch (Exception $e) { /* ignore si déjà fait */ }
 
     // Nettoyer les vieilles sessions expirées
     $db->exec("DELETE FROM erp_sessions WHERE expires_at < NOW()");
@@ -397,7 +405,7 @@ switch ($action) {
             SELECT s.token, s.login, u.nom, u.role,
                    DATE_FORMAT(s.created_at,'%d/%m/%Y %H:%i') AS created_at,
                    DATE_FORMAT(s.expires_at,'%d/%m/%Y %H:%i') AS expires_at,
-                   s.ip, s.user_agent AS ua,
+                   s.ip, s.user_agent,
                    CASE WHEN s.expires_at>NOW() THEN 'active' ELSE 'expirée' END AS statut
             FROM erp_sessions s
             JOIN erp_users u ON u.id=s.user_id

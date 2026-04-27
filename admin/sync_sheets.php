@@ -191,7 +191,7 @@ $pageTitle = 'Sync Google Sheets';
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link rel="stylesheet" href="<?= SITE_URL ?>/assets/css/admin.css">
 </head>
-<body>
+<body class="admin-body">
 <div class="admin-layout">
   <?php include __DIR__ . '/partials/sidebar.php'; ?>
   <main class="admin-main">

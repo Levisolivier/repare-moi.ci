@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS `rm_produits` (
   `marque`       VARCHAR(100) NOT NULL,
   `categorie`    VARCHAR(100) NOT NULL,
   `serie`        VARCHAR(50)  DEFAULT '',
+  `couleur`      VARCHAR(50)  DEFAULT NULL,
   `prix`         DECIMAL(12,0) NOT NULL DEFAULT 0,
   `stock`        INT NOT NULL DEFAULT 0,
   `image`        VARCHAR(500) DEFAULT '',

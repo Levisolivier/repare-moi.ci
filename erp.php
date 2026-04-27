@@ -688,16 +688,8 @@ tr:last-child td{border-bottom:none}
 <script>
 // ── GLOBAL ERROR HANDLER ──
 window.onerror = function(msg, src, line, col, err){
-  var d = document.getElementById('js-error-box');
-  if(d){ d.style.display='block'; d.textContent = 'JS Error L'+line+': '+msg; }
-  return false;
-};
-
-window.onerror=function(msg,src,line,col,err){
-  var d=document.createElement('div');
-  d.style.cssText='position:fixed;top:0;left:0;right:0;background:#7F1D1D;color:#FCA5A5;padding:10px;font-size:13px;z-index:9999;font-family:monospace';
-  d.textContent='JS ERROR: '+msg+' (line '+line+')';
-  document.body.appendChild(d);
+  var box = document.getElementById('js-error-box');
+  if(box){ box.style.display='block'; box.textContent='JS Error L'+line+': '+msg+(err?' — '+err.stack.split('\n')[0]:''); }
   return false;
 };
 
@@ -717,13 +709,14 @@ var RP = {
 var QUALITES = ['Original','INCELL','Compatible','Copy'];
 
 // ══ ÉTAT ══
-var AURL = 'https://script.google.com/macros/s/AKfycbyPBh-k-iFse1M1q8ma6ZpxQ97jKYFVPIRoUjJ3N5b_PO9bE76URWVL0DG57sE6sMZ3cQ/exec';
-localStorage.setItem('erp_url', AURL);
+// URL Google Apps Script (produits, ventes, analytics, réparations)
+var AURL = localStorage.getItem('erp_url') || 'https://script.google.com/macros/s/AKfycbyPBh-k-iFse1M1q8ma6ZpxQ97jKYFVPIRoUjJ3N5b_PO9bE76URWVL0DG57sE6sMZ3cQ/exec';
 var SET  = JSON.parse(localStorage.getItem('erp_s')||'{"faible":5,"devise":"FCFA"}');
-var CU = <?php echo json_encode($user_data); ?>;
+var CU   = <?php echo json_encode($user_data); ?>;   // injecté par PHP une seule fois
 var prods=[], ventes=[], reparations=[], ctM='wa';
-var cart=[];
-var charts = {};
+var cart=[], charts={};
+var usersCache=[];          // cache des utilisateurs ERP pour les sélecteurs
+function gU(){ return usersCache; }
 
 // ══ USERS ══
 // ─ API helpers ─
@@ -830,7 +823,7 @@ function initApp(){
   try{buildNav();}catch(e){}
   try{buildBN();}catch(e){}
   try{updSbUser();}catch(e){}
-  try{var cfgU=document.getElementById('cU');if(cfgU)cfgU.value='https://script.google.com/macros/s/AKfycbyPBh-k-iFse1M1q8ma6ZpxQ97jKYFVPIRoUjJ3N5b_PO9bE76URWVL0DG57sE6sMZ3cQ/exec';}catch(e){}
+  try{var cfgU=document.getElementById('cU');if(cfgU)cfgU.value=AURL;}catch(e){}
   try{var cfgF=document.getElementById('cF');if(cfgF)cfgF.value=SET.faible;}catch(e){}
   var allowed=RP[CU.role]||['dash'];
   var firstPage=document.querySelector('[data-p="'+allowed[0]+'"]');
@@ -896,8 +889,8 @@ function go(el){
     else if(p==='audit'){loadAudit();loadSessions();}
   }catch(err){console.warn('Page load error:',p,err);}
 }
-function navMobile(p){var el=document.querySelector('#sbN a[data-p="'+p+'"]');if(el)go(el);}
-function openM(){if(RP[CU.role].includes('vente'))navMobile('vente');}
+function navMobile(p){ navGo(p); }
+function openM(){ if(RP[CU.role].includes('vente')) navGo('vente'); }
 function toggleSB(){document.getElementById('SB').classList.toggle('on');document.getElementById('sbo').classList.toggle('on');}
 function closeSB(){document.getElementById('SB').classList.remove('on');document.getElementById('sbo').classList.remove('on');}
 
@@ -1251,6 +1244,7 @@ async function rUsersGrid(){
   try{
     var r=await apiPHPGet('users_list');
     if(!r.ok)throw new Error(r.error);
+    usersCache = r.users; // alimente gU() pour les sélecteurs de réparateurs
     grid.innerHTML=r.users.map(u=>{
       var ini=u.nom.split(' ').map(w=>w[0]).slice(0,2).join('').toUpperCase();
       var isMe=u.login===CU.login;
@@ -1303,7 +1297,14 @@ async function toggleUser(login,actif){
 }
 
 // ══ CONFIG ══
-async function saveURL(){var url=document.getElementById('cU').value.trim();if(!url){toast('⚠️ URL requise','w');return;}AURL=url;localStorage.setItem('erp_url',url);toast('✅ Sauvegardé — test...','s');await sync(document.getElementById('BS'));}
+async function saveURL(){
+  var url=document.getElementById('cU').value.trim();
+  if(!url){toast('⚠️ URL requise','w');return;}
+  AURL=url;
+  localStorage.setItem('erp_url',url);
+  toast('✅ URL sauvegardée — test en cours...','s');
+  await sync(document.getElementById('BS'));
+}
 function saveSet(){SET.faible=parseInt(document.getElementById('cF').value)||5;SET.devise=document.getElementById('cD').value;localStorage.setItem('erp_s',JSON.stringify(SET));toast('✅ Paramètres sauvegardés','s');}
 
 // ══ EXPORT ══
@@ -1425,9 +1426,9 @@ async function revokeSession(login){
 }
 
 // ══ BOOT ══
-// User injecte par PHP
-var CU = <?php echo json_encode($user_data); ?>;
-var AURL = 'https://repare-moi.ci/erp_api.php';
+// API PHP (gestion users, sessions, audit)
+var API_BASE = 'erp_api.php';
+// CU injecté par PHP (ne pas redéclarer — déjà dans l'état global ci-dessus)
 window.onload = function(){
   // Stocker token pour les appels API
   var cookies = document.cookie.split(';');
